@@ -1,0 +1,28 @@
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  email VARCHAR NOT NULL,
+  address VARCHAR,
+  cpf VARCHAR,
+  name VARCHAR NOT NULL,
+  password VARCHAR NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE shopping_carts (
+  id UUID PRIMARY KEY,
+  total_price numeric(10,2) NOT NULL,
+  user_id UUID NOT NULL,
+  products jsonb, 
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE products (
+  id UUID PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  bar_code VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  price numeric(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
