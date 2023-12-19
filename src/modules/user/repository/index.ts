@@ -3,17 +3,20 @@ import crypto from "node:crypto";
 import { ICreateUser } from "../models/createUser.model";
 import { IUser } from "../models/user.model";
 import IUserRepository from "../models/userRepository.model";
+import { ICreateSession } from "../models/createSession.model";
+import { IHashProvider } from "../models/hashProvider.model";
+import { IWebTokenProvider } from "../models/webTokenProvider.model";
+import { ISession } from "../models/session.model";
 
 class UserRepository implements IUserRepository {
   connection: Connection;
-  constructor() {
+  constructor(
+    private hashProvider: IHashProvider,
+    private webTokenProvider: IWebTokenProvider
+  ) {
     this.connection = new Connection();
   }
-  async index() {
-    const user = await this.connection.query("SELECT * FROM users", []);
 
-    return user;
-  }
   async create({ name, email, password }: ICreateUser): Promise<void> {
     const id = crypto.randomUUID();
     this.connection.query(
@@ -31,7 +34,9 @@ class UserRepository implements IUserRepository {
   }
   async getById(id: string): Promise<IUser> {
     const [user] = await this.connection.query(
-      `SELECT * FROM users WHERE id = $1`,
+      `SELECT id, email, address, cpf, name, created_at, updated_at
+       FROM users
+       WHERE id = $1`,
       [id]
     );
     return user;
@@ -42,6 +47,23 @@ class UserRepository implements IUserRepository {
       [email]
     );
     return user;
+  }
+  async createSession({ email, password }: ICreateSession): Promise<ISession> {
+    const user = await this.getByEmail(email);
+    if (!user) {
+      throw new Error("email/password incorrect");
+    }
+
+    const passwordConfirmed = await this.hashProvider.compareHash(
+      password,
+      user.password
+    );
+    if (!passwordConfirmed) {
+      throw new Error("email/password incorrect");
+    }
+    const token = await this.webTokenProvider.create(user.id);
+
+    return { user, token };
   }
 }
 export default UserRepository;

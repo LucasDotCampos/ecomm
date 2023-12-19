@@ -6,5 +6,5 @@ const app = express();
 app.use(express.json());
 app.use(routes);
 
-const port = process.env.PORT || 5555;
+const port = process.env.PORT;
 app.listen(port, () => console.log(`Server listening on ${port}`));

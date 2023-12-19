@@ -1,17 +1,15 @@
 import { ICreateUser } from "../models/createUser.model";
 import { IUser } from "../models/user.model";
 import IUserRepository from "../models/userRepository.model";
-import { IHashProvider } from "../providers/hashProvider/IHashProvider";
+import { IHashProvider } from "../models/hashProvider.model";
+import { ICreateSession } from "../models/createSession.model";
+import { ISession } from "../models/session.model";
 
 class UserService {
   constructor(
     private userRepository: IUserRepository,
     private hashProvider: IHashProvider
   ) {}
-
-  async index(): Promise<IUser[]> {
-    return await this.userRepository.index();
-  }
 
   async getById(id: string): Promise<IUser> {
     const user = await this.userRepository.getById(id);
@@ -22,8 +20,8 @@ class UserService {
 
   async create({ password, name, email }: ICreateUser): Promise<void> {
     const hashedPassword = await this.hashProvider.generateHash(password);
-    const user = await this.getByEmail(email);
-    if (user) throw new Error("User not found");
+    const user = await this.userRepository.getByEmail(email);
+    if (user) throw new Error("User already exists");
     this.userRepository.create({
       name,
       email,
@@ -41,6 +39,11 @@ class UserService {
     const user = await this.userRepository.getByEmail(email);
     if (!user) throw new Error("User not found");
     return user;
+  }
+
+  async createSession({ email, password }: ICreateSession): Promise<ISession> {
+    const token = await this.userRepository.createSession({ email, password });
+    return token;
   }
 }
 

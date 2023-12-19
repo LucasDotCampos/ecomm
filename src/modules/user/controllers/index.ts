@@ -1,20 +1,19 @@
 import { Request, Response } from "express";
 import UserService from "../services";
 import UserRepository from "../repository";
-import BcryptHashProvider from "../providers/hashProvider/bcryptHashProvider";
+import BcryptHashProvider from "../providers/hashProvider";
+import WebTokenProvider from "../providers/webTokenProvider";
 
 class UserController {
   userService: UserService;
+  hashProvider: BcryptHashProvider;
 
   constructor() {
+    this.hashProvider = new BcryptHashProvider();
     this.userService = new UserService(
-      new UserRepository(),
-      new BcryptHashProvider()
+      new UserRepository(this.hashProvider, new WebTokenProvider()),
+      this.hashProvider
     );
-  }
-  async index(request: Request, response: Response) {
-    const users = await this.userService.index();
-    return response.json(users);
   }
 
   async create(request: Request, response: Response) {
@@ -47,6 +46,15 @@ class UserController {
       return response.json(user);
     } catch (err: any) {
       return response.status(404).json(err.message);
+    }
+  }
+  async createSession(request: Request, response: Response) {
+    try {
+      const { email, password } = request.body;
+      const session = await this.userService.createSession({ email, password });
+      return response.json(session);
+    } catch (err: any) {
+      return response.status(400).json(err.message);
     }
   }
 }
