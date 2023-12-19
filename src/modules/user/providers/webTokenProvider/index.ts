@@ -10,8 +10,7 @@ class WebTokenProvider implements IWebTokenProvider {
     return token;
   }
   async verify(token: string) {
-    const isValidToken = verify(token, `${process.env.JWT_SECRET}`);
-    return isValidToken;
+    return verify(token, `${process.env.JWT_SECRET}`);
   }
 }
 export default WebTokenProvider;
