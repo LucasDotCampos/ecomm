@@ -4,6 +4,7 @@ import IUserRepository from "../models/userRepository.model";
 import { IHashProvider } from "../models/hashProvider.model";
 import { ICreateSession } from "../models/createSession.model";
 import { ISession } from "../models/session.model";
+import { IUpdateUser } from "../models/updateUser.model";
 
 class UserService {
   constructor(
@@ -44,6 +45,12 @@ class UserService {
   async createSession({ email, password }: ICreateSession): Promise<ISession> {
     const token = await this.userRepository.createSession({ email, password });
     return token;
+  }
+  async changeRole({ admin, id, role }: IUpdateUser): Promise<void> {
+    const user = await this.userRepository.getById(admin);
+    if (user.role === "client")
+      throw new Error("You don't have permission to change role.");
+    await this.userRepository.changeRole({ admin, id, role });
   }
 }
 

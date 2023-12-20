@@ -3,6 +3,7 @@ export interface IUser {
   email: string;
   cpf: string | null;
   address: string | null;
+  role: string;
   name: string;
   password: string;
   created_at: Date;

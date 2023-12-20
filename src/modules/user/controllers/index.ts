@@ -57,6 +57,16 @@ class UserController {
       return response.status(400).json(err.message);
     }
   }
+  async changeRole(request: Request, response: Response) {
+    try {
+      const admin = request.userId;
+      const { id, role } = request.body;
+      await this.userService.changeRole({ admin, id, role });
+      return response.sendStatus(200);
+    } catch (err: any) {
+      return response.status(400).json(err.message);
+    }
+  }
 }
 
 export default UserController;

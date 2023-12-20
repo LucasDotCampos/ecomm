@@ -7,6 +7,7 @@ import { ICreateSession } from "../models/createSession.model";
 import { IHashProvider } from "../models/hashProvider.model";
 import { IWebTokenProvider } from "../models/webTokenProvider.model";
 import { ISession } from "../models/session.model";
+import { IUpdateUser } from "../models/updateUser.model";
 
 class UserRepository implements IUserRepository {
   connection: Connection;
@@ -64,6 +65,17 @@ class UserRepository implements IUserRepository {
     const token = await this.webTokenProvider.create(user.id);
 
     return { user, token };
+  }
+  async changeRole({ admin, id, role }: IUpdateUser): Promise<void> {
+    const user = await this.getById(admin);
+    if (user.role === "client")
+      throw new Error("You don't have permission to change role.");
+    await this.connection.query(
+      `UPDATE users
+       SET role = $1
+       WHERE id = $2;`,
+      [role, id]
+    );
   }
 }
 export default UserRepository;

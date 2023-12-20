@@ -1,6 +1,7 @@
 import { ICreateSession } from "./createSession.model";
 import { ICreateUser } from "./createUser.model";
 import { ISession } from "./session.model";
+import { IUpdateUser } from "./updateUser.model";
 import { IUser } from "./user.model";
 
 export default interface IUserRepository {
@@ -9,4 +10,5 @@ export default interface IUserRepository {
   getById(id: string): Promise<IUser>;
   getByEmail(email: string): Promise<IUser>;
   createSession({ email, password }: ICreateSession): Promise<ISession>;
+  changeRole({ id, role }: IUpdateUser): Promise<void>;
 }

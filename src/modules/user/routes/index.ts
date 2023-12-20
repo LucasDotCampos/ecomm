@@ -13,4 +13,9 @@ userRoutes.delete(
   isAuthenticated,
   userController.delete.bind(userController)
 );
+userRoutes.patch(
+  "/role",
+  isAuthenticated,
+  userController.changeRole.bind(userController)
+);
 userRoutes.post("/session", userController.createSession.bind(userController));
