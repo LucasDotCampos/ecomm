@@ -7,24 +7,28 @@ import WebTokenProvider from "../providers/webTokenProvider";
 class UserController {
   userService: UserService;
   hashProvider: BcryptHashProvider;
+  userRepository: UserRepository;
+  webtokenProvider: WebTokenProvider;
 
   constructor() {
     this.hashProvider = new BcryptHashProvider();
+    this.userRepository = new UserRepository(this.hashProvider);
+    this.webtokenProvider = new WebTokenProvider();
     this.userService = new UserService(
-      new UserRepository(this.hashProvider, new WebTokenProvider()),
-      this.hashProvider
+      this.userRepository,
+      this.hashProvider,
+      this.webtokenProvider
     );
   }
 
   async create(request: Request, response: Response) {
     try {
       const { email, name, password } = request.body;
-      const user = await this.userService.create({
+      await this.userService.create({
         email,
         password,
         name,
       });
-      return response.json(user);
     } catch (err: any) {
       return response.status(400).json(err.message);
     }

@@ -5,11 +5,13 @@ import { IHashProvider } from "../models/hashProvider.model";
 import { ICreateSession } from "../models/createSession.model";
 import { ISession } from "../models/session.model";
 import { IUpdateUser } from "../models/updateUser.model";
+import { IWebTokenProvider } from "../models/webTokenProvider.model";
 
 class UserService {
   constructor(
     private userRepository: IUserRepository,
-    private hashProvider: IHashProvider
+    private hashProvider: IHashProvider,
+    private webTokenProvider: IWebTokenProvider
   ) {}
 
   async getById(id: string): Promise<IUser> {
@@ -43,8 +45,19 @@ class UserService {
   }
 
   async createSession({ email, password }: ICreateSession): Promise<ISession> {
-    const token = await this.userRepository.createSession({ email, password });
-    return token;
+    const user = await this.userRepository.getByEmail(email);
+    if (!user) {
+      throw new Error("email/password incorrect");
+    }
+    const passwordConfirmed = await this.hashProvider.compareHash(
+      password,
+      user.password
+    );
+    if (!passwordConfirmed) {
+      throw new Error("email/password incorrect");
+    }
+    const token = await this.webTokenProvider.create(user.id);
+    return { user, token };
   }
   async changeRole({ admin, id, role }: IUpdateUser): Promise<void> {
     const user = await this.userRepository.getById(admin);

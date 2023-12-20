@@ -1,25 +1,19 @@
 import Connection from "../../../shared/database/connection";
-import crypto from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { ICreateUser } from "../models/createUser.model";
 import { IUser } from "../models/user.model";
 import IUserRepository from "../models/userRepository.model";
-import { ICreateSession } from "../models/createSession.model";
 import { IHashProvider } from "../models/hashProvider.model";
-import { IWebTokenProvider } from "../models/webTokenProvider.model";
-import { ISession } from "../models/session.model";
 import { IUpdateUser } from "../models/updateUser.model";
 
 class UserRepository implements IUserRepository {
   connection: Connection;
-  constructor(
-    private hashProvider: IHashProvider,
-    private webTokenProvider: IWebTokenProvider
-  ) {
+  constructor(private hashProvider: IHashProvider) {
     this.connection = new Connection();
   }
 
   async create({ name, email, password }: ICreateUser): Promise<void> {
-    const id = crypto.randomUUID();
+    const id = randomUUID();
     this.connection.query(
       `INSERT INTO users (id, name, email, password)
        VALUES ($1, $2, $3, $4)`,
@@ -49,27 +43,8 @@ class UserRepository implements IUserRepository {
     );
     return user;
   }
-  async createSession({ email, password }: ICreateSession): Promise<ISession> {
-    const user = await this.getByEmail(email);
-    if (!user) {
-      throw new Error("email/password incorrect");
-    }
 
-    const passwordConfirmed = await this.hashProvider.compareHash(
-      password,
-      user.password
-    );
-    if (!passwordConfirmed) {
-      throw new Error("email/password incorrect");
-    }
-    const token = await this.webTokenProvider.create(user.id);
-
-    return { user, token };
-  }
   async changeRole({ admin, id, role }: IUpdateUser): Promise<void> {
-    const user = await this.getById(admin);
-    if (user.role === "client")
-      throw new Error("You don't have permission to change role.");
     await this.connection.query(
       `UPDATE users
        SET role = $1

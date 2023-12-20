@@ -4,9 +4,7 @@ export default class Connection {
   connection: any;
 
   constructor() {
-    this.connection = pgp()(
-      "postgres://postgres:postgres@localhost:5432/ecomm?schema=public"
-    );
+    this.connection = pgp()(`${process.env.DATABASE_URL}`);
   }
 
   query(statement: string, params: any): Promise<any> {

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import WebTokenProvider from "../modules/user/providers/webTokenProvider";
-import { ITokenPayload } from "../modules/user/models/tokenPayload.model";
+import WebTokenProvider from "../../modules/user/providers/webTokenProvider";
+import { ITokenPayload } from "../../modules/user/models/tokenPayload.model";
 
 export default async function isAuthenticated(
   request: Request,
