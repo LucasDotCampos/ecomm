@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import UserService from "../services";
-import UserRepository from "../repository";
+import UserRepository from "../repositories";
 import BcryptHashProvider from "../providers/hashProvider";
 import WebTokenProvider from "../providers/webTokenProvider";
 
@@ -29,6 +29,7 @@ class UserController {
         password,
         name,
       });
+      return response.sendStatus(200);
     } catch (err: any) {
       return response.status(400).json(err.message);
     }
